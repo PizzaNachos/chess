@@ -1,4 +1,6 @@
 #include <vector>
+#include <memory>
+#include <string>
 
 enum COLOR {
     WHITE,
@@ -6,22 +8,24 @@ enum COLOR {
 };
 enum TYPE {
     PAWN,
+    ROOK,
     KNIGHT,
     BISHOP,
-    ROOK,
     QUEEN,
     KING
 };
 
 
 struct peice {
+public:
     TYPE type;
     COLOR color;
     int square_num;    
 };
 struct sqaure {
+public:    
     int number;
-    peice* peice;
+    std::shared_ptr<peice> peice_on_square;
 };
 
 
@@ -31,6 +35,7 @@ private:
     std::vector<peice> peices;
     std::vector<sqaure> squares;
 public:
-    board(std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    board();
     ~board();
+    void print();
 };
