@@ -3,5 +3,6 @@
 
 int main(){
     board b = board();
+    b.print();
     return 0;
 }

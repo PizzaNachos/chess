@@ -22,18 +22,20 @@ public:
     COLOR color;
     int square_num;    
 };
-struct sqaure {
+
+
+struct square {
 public:    
     int number;
-    std::shared_ptr<peice> peice_on_square;
+    peice peice_on_square;
 };
 
 
 class board
 {
 private:
-    std::vector<peice> peices;
-    std::vector<sqaure> squares;
+    std::vector<std::shared_ptr<peice>> peices;
+    std::vector<square> squares;
 public:
     board();
     ~board();
