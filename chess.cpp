@@ -1,8 +1,15 @@
 #include "chess.h"
 #include "board.h"
+#include <iostream>
 
 int main(){
-    board b = board();
-    b.print();
+    board* b = new board();
+    b->print();
+
+    int start, end;
+    while ((std::cin >> start) && (std::cin >> end)){
+        b->make_move(start,end);
+        b->print();
+    }
     return 0;
 }
