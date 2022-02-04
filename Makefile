@@ -9,3 +9,5 @@ clean:
 
 release: 
 	g++ -O3 --std=c++17 chess.cpp board.cpp -o ./target/chess_release
+asm:
+	g++ -S --std=c++17 chess.cpp board.cpp

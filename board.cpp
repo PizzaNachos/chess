@@ -25,7 +25,51 @@ bool board::make_move(char start, char end){
     squares.at(start).peice_index = -1;
     return true;
 }
+std::vector<move> board::get_moves(COLOR c){
+    std::vector<move> moves;
+    for(peice p : this->peices){
+        //Only calculate moves for our colors peices
+        if(p.color != c) continue;
+
+        if(p.type == ROOK || p.type == BISHOP || p.type == QUEEN){
+            int directions[] = {-9,-8,-7,-1,7,1,9,8};
+            int slide_mask = 1;
+            int slide_offset = 0;
+
+            if(p.type == BISHOP) {
+                slide_mask = 2;
+                slide_offset = 0;
+            }
+            if(p.type == ROOK) {
+                slide_mask = 2;
+                slide_offset = 1;
+            }
+            for(int i = slide_offset; i < 8; i += slide_mask){
+                //How to get distance to edge? depends on direction i think, if x > 63 || x < 0
+                
+                // printf("<%c,%i>\n",p.type + p.color, directions[i]);
+
+            }
+                //Walk in each 4 directions (-1,1,-8,8) until the end of the board, or till we hit a peice, if its opposite colored we 
+                //add that move, if same color we discard it
+        }
+        if(p.type == KNIGHT){
+            //Off sets = 15,17,
+            //Knight
+        }
+        if(p.type == PAWN){
+            //Spooky
+        }
+        if(p.type == KING){
+            //Casteling and stuff
+        }
+
+    }
+    return moves;
+}
+
 void board::fill_peices_squares_default(){
+
     //Fill black peices
     this->peices[0] = peice{ROOK,   BLACK, 0};
     this->peices[1] = peice{KNIGHT, BLACK, 1};

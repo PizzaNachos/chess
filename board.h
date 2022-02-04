@@ -22,6 +22,8 @@ public:
     TYPE type;
     COLOR color;
     char square_num;    
+
+    bool moved = false;
 };
 
 
@@ -37,6 +39,13 @@ public:
     char end;
 };
 
+struct made_move{
+    char start_square;
+    char end_square;
+    peice start_peice;
+    peice destroed_peice;
+};
+
 
 class board
 {
@@ -46,10 +55,12 @@ private:
     std::array<peice, 32> peices;
     std::array<square, 64> squares;
 
+    std::vector<made_move> made_moves;
     void fill_peices_squares_default();
 public:
     board();
     ~board();
     void print();
+    std::vector<move> get_moves(COLOR c);
     bool make_move(char start, char end);
 };
