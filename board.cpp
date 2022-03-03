@@ -7,6 +7,7 @@
 // std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 board::board() {
     this->fill_peices_squares_default();
+    // this->squares_to_direction_map = new std::unordered_map(); //<square_and_direction,int>();
     // std::string section;
     // std::vector<std::string> fen_sections;
     // while (getline(fen, section, ' ')) {
@@ -63,33 +64,38 @@ void board::unmake_move(made_move m){
     this->squares.at(m.end_square).peice_index = m.destroed_peice_index;
 }
 int board::squares_in_direction(int start_square, int direction){
+    int square_and_direction = (start_square * 100) + direction;
+    //Start squares = 0 - 63
+    //Directions = -9 - 9
+    // 62 * 100 = 6200 + -9 = 6111
+    // 61 + 1 = 610 + 1 = 611
     int distance = 0;
-    if(this->squares_to_direction_map.count(square_and_direction{start_square, direction})){
-        return this->squares_to_direction_map.at(square_and_direction{start_square, direction});
+    if(this->squares_to_direction_map.count(square_and_direction)){
+        return this->squares_to_direction_map.at(square_and_direction);
     } 
 
     //Left
     if(direction == -1){
         distance = (start_square % 8) - 1;
-        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     }
     //Right
     if(direction == 1){
         distance = 8 - (start_square % 8);
-        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     }
     //Up
     if(direction == 8){
         distance = 8 - (start_square / 8);
-        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     }
     //Down
     if(direction == -8){
         distance = (start_square / 8) - 1;
-        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     }
 
@@ -98,7 +104,7 @@ int board::squares_in_direction(int start_square, int direction){
         int down = (start_square / 8) - 1;
         int right = 8 - (start_square % 8);
         distance = down < right ? down : right;
-        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     }
     //Down left
@@ -106,7 +112,7 @@ int board::squares_in_direction(int start_square, int direction){
         int down = (start_square / 8) - 1;
         int left = (start_square % 8) - 1;
         distance = down < left ? down : left;
-        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     } 
     //Up Left
@@ -114,7 +120,7 @@ int board::squares_in_direction(int start_square, int direction){
         int up = 8 - (start_square / 8);
         int left = (start_square % 8) - 1;
         distance = up < left ? up : left;
-        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     } 
     //Up Right
@@ -122,11 +128,10 @@ int board::squares_in_direction(int start_square, int direction){
         int up = 8 - (start_square / 8);
         int right = 8 - (start_square % 8);
         distance = up < right ? up : right;
-        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     }
-
-
+    return 0;
 }
 std::vector<move> board::get_moves(COLOR c){
     std::vector<move> moves;

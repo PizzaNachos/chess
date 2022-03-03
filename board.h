@@ -47,10 +47,6 @@ struct made_move{
     char destroed_peice_index;
 };
 
-struct square_and_direction{
-    int sqaure;
-    int direction;
-};
 
 class board
 {
@@ -63,7 +59,7 @@ private:
     //Sqaure 65 is the dead peice square
     std::array<square, 65> squares;
     std::vector<made_move> made_moves;
-    std::unordered_map<square_and_direction,int> squares_to_direction_map;
+    std::unordered_map<int,int> squares_to_direction_map;
 
     void fill_peices_squares_default();
     bool can_move_to_square(char square_num, COLOR c);
