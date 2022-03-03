@@ -31,6 +31,14 @@ void board::print(){
         if((i % 8 == 0)) std::cout << std::endl;
             
         // printf(" %i:%i ",i,this->squares[i].peice_index);
+        if(i == 26){
+            printf("26 ");
+            continue;
+        }
+        if(i == 27){
+            printf("27 ");
+            continue;
+        }
         if(this->squares[i].peice_index == 33) {
             printf(" . ");
         } else {
@@ -76,58 +84,58 @@ int board::squares_in_direction(int start_square, int direction){
 
     //Left
     if(direction == -1){
-        distance = (start_square % 8) - 1;
+        distance = (start_square % 8);
         this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     }
     //Right
     if(direction == 1){
-        distance = 8 - (start_square % 8);
-        this->squares_to_direction_map.emplace(square_and_direction,distance);
-        return distance;
-    }
-    //Up
-    if(direction == 8){
-        distance = 8 - (start_square / 8);
+        distance = 7 - (start_square % 8);
         this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     }
     //Down
+    if(direction == 8){
+        distance = 7 - (start_square / 8);
+        this->squares_to_direction_map.emplace(square_and_direction,distance);
+        return distance;
+    }
+    //UP
     if(direction == -8){
-        distance = (start_square / 8) - 1;
+        distance = (start_square / 8);
         this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     }
 
     //Down Right
-    if(direction == -9){
-        int down = (start_square / 8) - 1;
-        int right = 8 - (start_square % 8);
-        distance = down < right ? down : right;
+    if(direction == 9){
+        int down = 7 - (start_square / 8);
+        int right = 7 - (start_square % 8);
+        distance = (down < right) ? down : right;
         this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     }
     //Down left
-    if(direction == -7){
-        int down = (start_square / 8) - 1;
-        int left = (start_square % 8) - 1;
-        distance = down < left ? down : left;
-        this->squares_to_direction_map.emplace(square_and_direction,distance);
-        return distance;
-    } 
-    //Up Left
     if(direction == 7){
-        int up = 8 - (start_square / 8);
-        int left = (start_square % 8) - 1;
-        distance = up < left ? up : left;
+        int down = 7 - (start_square / 8);
+        int left = (start_square % 8);
+        distance = (down < left) ? down : left;
         this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     } 
     //Up Right
-    if(direction == 9){
-        int up = 8 - (start_square / 8);
-        int right = 8 - (start_square % 8);
-        distance = up < right ? up : right;
+    if(direction == -7){
+        int up = (start_square / 8);
+        int right = 7 - (start_square % 8);
+        distance = (up < right) ? up : right;
+        this->squares_to_direction_map.emplace(square_and_direction,distance);
+        return distance;
+    } 
+    //Up Left
+    if(direction == -9){
+        int up = (start_square / 8);
+        int left = (start_square % 8);
+        distance = (up < left) ? up : left;
         this->squares_to_direction_map.emplace(square_and_direction,distance);
         return distance;
     }
