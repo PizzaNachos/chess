@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <array>
+#include <unordered_map>
 
 enum COLOR {
     WHITE = 0,
@@ -42,25 +43,36 @@ public:
 struct made_move{
     char start_square;
     char end_square;
-    peice start_peice;
-    peice destroed_peice;
+    char start_peice_index;
+    char destroed_peice_index;
 };
 
+struct square_and_direction{
+    int sqaure;
+    int direction;
+};
 
 class board
 {
 private:
 //Board has two arrays, one of its peices, and one of its squares
 //Squares have a pointer to their peice, or just the index of that peice in the array
-    std::array<peice, 32> peices;
-    std::array<square, 64> squares;
+    //Peice 33 is a non-peice
+    std::array<peice, 33> peices;
 
+    //Sqaure 65 is the dead peice square
+    std::array<square, 65> squares;
     std::vector<made_move> made_moves;
+    std::unordered_map<square_and_direction,int> squares_to_direction_map;
+
     void fill_peices_squares_default();
+    bool can_move_to_square(char square_num, COLOR c);
+    int squares_in_direction(int start_square, int direction);
 public:
     board();
     ~board();
     void print();
     std::vector<move> get_moves(COLOR c);
-    bool make_move(char start, char end);
+    made_move make_move(move m);
+    void unmake_move(made_move m);
 };

@@ -2,56 +2,236 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <unordered_map>
 
 // std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 board::board() {
     this->fill_peices_squares_default();
+    // std::string section;
+    // std::vector<std::string> fen_sections;
+    // while (getline(fen, section, ' ')) {
+    //     fen_sections.push_back(section);
+    // }
+    // this->peices[0] = peice{ROOK,   WHITE, 11};
+    // this->peices[1] = peice{ROOK,   WHITE, 43};
+    // this->peices[2] = peice{ROOK,   BLACK, 46};
+
+    // for(char i = 0; i < this->squares.size(); i++){
+    //     this->squares[i] = square{i, 33};
+    // }
+
+    // //Make squares index proper
+    // for(char i = 0; i < peices.size(); i++){
+    //     squares[peices[i].square_num].peice_index = i;
+    // }
 }
 void board::print(){
-    for(int i = 0; i < this->squares.size(); ++i){
-        if((i % 8 == 0)) printf("\n");
-
-        if(squares[i].peice_index == -1) {
+    for(int i = 0; i < 64; ++i){
+        if((i % 8 == 0)) std::cout << std::endl;
+            
+        // printf(" %i:%i ",i,this->squares[i].peice_index);
+        if(this->squares[i].peice_index == 33) {
             printf(" . ");
         } else {
-            peice p = this->peices[squares[i].peice_index];
+            peice p = this->peices[this->squares[i].peice_index];
             printf(" %c ",(p.type + p.color));
         }
     }
     std::cout << std::endl;
 }
-bool board::make_move(char start, char end){
-    squares.at(end) = squares.at(start);
-    squares.at(start).peice_index = -1;
-    return true;
+made_move board::make_move(const move m){
+    made_move mov = {
+        m.start,
+        m.end,
+        this->squares.at(m.start).peice_index,
+        this->squares.at(m.end).peice_index
+    };
+
+    this->peices.at(squares.at(m.start).peice_index).square_num = m.end;
+    this->squares.at(m.end).peice_index = this->squares.at(m.start).peice_index;
+
+    this->peices.at(squares.at(m.end).peice_index).square_num = 64;
+    this->squares.at(m.start).peice_index = 33;
+
+    return mov;
+}
+void board::unmake_move(made_move m){
+    this->peices.at(m.destroed_peice_index).square_num = m.end_square;
+    this->peices.at(m.start_peice_index).square_num = m.start_square;
+
+    this->squares.at(m.start_square).peice_index = m.start_peice_index;
+    this->squares.at(m.end_square).peice_index = m.destroed_peice_index;
+}
+int board::squares_in_direction(int start_square, int direction){
+    int distance = 0;
+    if(this->squares_to_direction_map.count(square_and_direction{start_square, direction})){
+        return this->squares_to_direction_map.at(square_and_direction{start_square, direction});
+    } 
+
+    //Left
+    if(direction == -1){
+        distance = (start_square % 8) - 1;
+        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        return distance;
+    }
+    //Right
+    if(direction == 1){
+        distance = 8 - (start_square % 8);
+        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        return distance;
+    }
+    //Up
+    if(direction == 8){
+        distance = 8 - (start_square / 8);
+        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        return distance;
+    }
+    //Down
+    if(direction == -8){
+        distance = (start_square / 8) - 1;
+        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        return distance;
+    }
+
+    //Down Right
+    if(direction == -9){
+        int down = (start_square / 8) - 1;
+        int right = 8 - (start_square % 8);
+        distance = down < right ? down : right;
+        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        return distance;
+    }
+    //Down left
+    if(direction == -7){
+        int down = (start_square / 8) - 1;
+        int left = (start_square % 8) - 1;
+        distance = down < left ? down : left;
+        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        return distance;
+    } 
+    //Up Left
+    if(direction == 7){
+        int up = 8 - (start_square / 8);
+        int left = (start_square % 8) - 1;
+        distance = up < left ? up : left;
+        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        return distance;
+    } 
+    //Up Right
+    if(direction == 9){
+        int up = 8 - (start_square / 8);
+        int right = 8 - (start_square % 8);
+        distance = up < right ? up : right;
+        this->squares_to_direction_map.emplace(square_and_direction{start_square,direction},distance);
+        return distance;
+    }
+
+
 }
 std::vector<move> board::get_moves(COLOR c){
     std::vector<move> moves;
     for(peice p : this->peices){
         //Only calculate moves for our colors peices
         if(p.color != c) continue;
-
         if(p.type == ROOK || p.type == BISHOP || p.type == QUEEN){
-            int directions[] = {-9,-8,-7,-1,7,1,9,8};
-            int slide_mask = 1;
-            int slide_offset = 0;
+            // int directions[] = {-9,-8,-7,-1,7,1,9,8};
+            int ydirections[] = {-1,0,1,0};
+            int xdirections[] = {-8,0,8,0};
+
+            int x_mask = 2;
+            int x_index = 0;
+
+            int y_mask = 2;
+            int y_index = 0;
 
             if(p.type == BISHOP) {
-                slide_mask = 2;
-                slide_offset = 0;
-            }
-            if(p.type == ROOK) {
-                slide_mask = 2;
-                slide_offset = 1;
-            }
-            for(int i = slide_offset; i < 8; i += slide_mask){
-                //How to get distance to edge? depends on direction i think, if x > 63 || x < 0
+
+                for(char x = p.square_num - 7; x >= 0; x -= 8){
+                    if(this->squares[x].peice_index == 33){
+                            moves.push_back(move{p.square_num, x});
+                        } else if(this->peices[this->squares[x].peice_index].color != c){
+                            moves.push_back(move{p.square_num, x});
+                            break;
+                        } else {break;}                    
+                }
+
+                //Down 
+                for(char x = p.square_num + 9; x < 63; x += 8){
+                     if(this->squares[x].peice_index == 33){
+                            moves.push_back(move{p.square_num, x});
+                        } else if(this->peices[this->squares[x].peice_index].color != c){
+                            moves.push_back(move{p.square_num, x});
+                            break;
+                        } else {break;}  
+                }
+
+                //Right
+                for(char x = p.square_num + 7; x < p.square_num + (8 - (p.square_num % 8) ); x++){
+                     if(this->squares[x].peice_index == 33){
+                            moves.push_back(move{p.square_num, x});
+                        } else if(this->peices[this->squares[x].peice_index].color != c){
+                            moves.push_back(move{p.square_num, x});
+                            break;
+                        } else {break;}  
+                }
+
+                //Left
+                for(char x = p.square_num - 9; x >= p.square_num - (p.square_num % 8); --x){
+                    if(this->squares[x].peice_index == 33){
+                            moves.push_back(move{p.square_num, x});
+                        } else if(this->peices[this->squares[x].peice_index].color != c){
+                            moves.push_back(move{p.square_num, x});
+                            break;
+                        } else {break;}  
+                }
                 
-                // printf("<%c,%i>\n",p.type + p.color, directions[i]);
+            } 
+            else if(p.type == ROOK) {
+
+                //Up
+                for(char x = p.square_num - 8; x >= 0; x -= 8){
+                    if(this->squares[x].peice_index == 33){
+                            moves.push_back(move{p.square_num, x});
+                        } else if(this->peices[this->squares[x].peice_index].color != c){
+                            moves.push_back(move{p.square_num, x});
+                            break;
+                        } else {break;}                    
+                }
+
+                //Down 
+                for(char x = p.square_num + 8; x < 63; x += 8){
+                     if(this->squares[x].peice_index == 33){
+                            moves.push_back(move{p.square_num, x});
+                        } else if(this->peices[this->squares[x].peice_index].color != c){
+                            moves.push_back(move{p.square_num, x});
+                            break;
+                        } else {break;}  
+                }
+
+                //Right
+                for(char x = p.square_num + 1; x < p.square_num + (8 - (p.square_num % 8) ); x++){
+                     if(this->squares[x].peice_index == 33){
+                            moves.push_back(move{p.square_num, x});
+                        } else if(this->peices[this->squares[x].peice_index].color != c){
+                            moves.push_back(move{p.square_num, x});
+                            break;
+                        } else {break;}  
+                }
+
+                //Left
+                for(char x = p.square_num - 1; x >= p.square_num - (p.square_num % 8); --x){
+                    if(this->squares[x].peice_index == 33){
+                            moves.push_back(move{p.square_num, x});
+                        } else if(this->peices[this->squares[x].peice_index].color != c){
+                            moves.push_back(move{p.square_num, x});
+                            break;
+                        } else {break;}  
+                }
+            } 
+            else {
 
             }
-                //Walk in each 4 directions (-1,1,-8,8) until the end of the board, or till we hit a peice, if its opposite colored we 
-                //add that move, if same color we discard it
+
         }
         if(p.type == KNIGHT){
             //Off sets = 15,17,
@@ -59,6 +239,11 @@ std::vector<move> board::get_moves(COLOR c){
         }
         if(p.type == PAWN){
             //Spooky
+            if(c == BLACK){
+                
+            } else {
+
+            }
         }
         if(p.type == KING){
             //Casteling and stuff
@@ -108,13 +293,15 @@ void board::fill_peices_squares_default(){
     this->peices[30] = peice{PAWN, WHITE, 54};
     this->peices[31] = peice{PAWN, WHITE, 55};
 
+    // this->peices[32] = NULL;
+
     //Fill all squares
     for(char i = 0; i < this->squares.size(); i++){
-        this->squares[i] = square{i, -1};
+        this->squares[i] = square{i, 33};
     }
 
     //Make squares index proper
-    for(char i = 0; i < peices.size(); i++){
+    for(char i = 0; i < peices.size() - 1; i++){
         squares[peices[i].square_num].peice_index = i;
     }
 

@@ -10,7 +10,14 @@ int main(){
     // while ((std::cin >> start) && (std::cin >> end)){
         // b->make_move(start,end);
         // b->print();
-        b->get_moves(WHITE);
-    // }
+    int moves_num = 0;
+    std::vector<move> current_moves = b->get_moves(WHITE);
+
+    for(move m : current_moves){
+        made_move mo = b->make_move(m);
+        b->print();
+        b->unmake_move(mo);
+    }
+
     return 0;
 }
