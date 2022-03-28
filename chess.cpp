@@ -12,7 +12,7 @@ int main(){
         // b->print();
     int moves_num = 0;
     std::vector<move> current_moves = b->get_moves(WHITE);
-
+    std::cout << "#Moves: " << current_moves.size() << std::endl;
     for(move m : current_moves){
         made_move mo = b->make_move(m);
         b->print();
